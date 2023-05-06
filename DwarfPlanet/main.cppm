@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
 
+#include <FastNoise/FastNoise.h>
+
 import <iostream>;
 import Window;
 import glmModule;
@@ -29,6 +31,8 @@ Camera camera(Vec3(0.0f, 17.0f, 0.0f));
 
 int main()
 {
+	FastNoise::New<FastNoise::Perlin>();
+
 	Window window("Dwarf Planet", WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	if (!window.initGLFW())
