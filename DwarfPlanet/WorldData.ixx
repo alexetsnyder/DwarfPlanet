@@ -70,6 +70,8 @@ export class WorldData
 	public:
 		WorldData(int chunkHeight)
 		{
+			this->worldSize = 4;
+			this->chunkWidth = 4;
 			this->chunkHeight = chunkHeight;
 			this->dirtDepth = 2;
 
@@ -108,12 +110,32 @@ export class WorldData
 			return getBlockTypeLookUp()[name];
 		}
 
-		bool hasSolidVoxel(Vec3 position)
+		bool hasSolidVoxel(Vec3& position)
 		{
+			if (isOutsideWorld(position))
+			{
+				return false;
+			}
+
+			int voxel = getVoxel(position);
+
+			return getBlockType(voxel).isSolid;
+		}
+
+		bool isOutsideWorld(Vec3& position)
+		{
+			int bound = chunkWidth * worldSize / 2;
+			if (position.y() < 0 || position.y() > chunkHeight - 1 ||
+				position.x() < -bound || position.x() > bound - 1 ||
+				position.z() < -bound || position.z() > bound - 1)
+			{
+				return true;
+			}
+
 			return false;
 		}
 
-		int getVoxel(Vec3 position)
+		int getVoxel(Vec3& position)
 		{
 			int yPos = floor(position.y());
 
@@ -155,6 +177,6 @@ export class WorldData
 			return blockTypeLookUp;
 		}
 
-		int chunkHeight, dirtDepth;
+		int chunkWidth, chunkHeight, dirtDepth, worldSize;
 };
 

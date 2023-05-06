@@ -159,11 +159,16 @@ export class Chunk
 			generateTexture();
 		}
 
+		Vec3 getPosition()
+		{
+			return Vec3(chunkId.x * width, 0.0f, chunkId.z * width);
+		}
+
 		Mat4 getModel()
 		{
 			model = Mat4(1.0f);
 
-			Vec3 position = Vec3(chunkId.x * width, 0.0f, chunkId.z * width);
+			Vec3 position = getPosition();
 
 			model = model.translate(position);
 
@@ -186,9 +191,9 @@ export class Chunk
 
 			for (int y = 0; y < height; y++)
 			{
-				for (int x = -width / 2; x < width / 2; x++)
+				for (int x = 0; x < width; x++)
 				{
-					for (int z = -width / 2; z < width / 2; z++)
+					for (int z = 0; z < width; z++)
 					{
 						float offsetPos[3] = { x, y, z };
 						createVoxel(mesh, offsetPos);
@@ -226,12 +231,8 @@ export class Chunk
 
 		bool hasSolidVoxel(Vec3 position)
 		{
-			if (isOutsideChunk(position))
-			{
-				return false;
-			}
-
-			return true;
+			Vec3 worldPos = position + getPosition();
+			return data.hasSolidVoxel(worldPos);
 		}
 
 		bool isOutsideChunk(Vec3 position)
@@ -259,9 +260,11 @@ export class Chunk
 			for (int i = 0; i < 6; i++)
 			{
 				Vec3 position = Vec3(offsetPos[0], offsetPos[1], offsetPos[2]);
-				if (!hasSolidVoxel(position + NeighborArray[i]))
+				Vec3 neighborPos = position + NeighborArray[i];
+				if (!hasSolidVoxel(neighborPos))
 				{
-					BlockType blockType = data.getBlockType(data.getVoxel(position));
+					Vec3 worldPos = position + getPosition();
+					BlockType blockType = data.getBlockType(data.getVoxel(worldPos));
 					std::string textureName = blockType.getTextureName(i);
 					std::vector<float> uvVector = atlas.getUVCoordinates(textureName);
 					for (int j = 0; j < 4; j++)
@@ -269,7 +272,7 @@ export class Chunk
 						int index = cubeIndexArray[i][j];
 						for (int k = 0; k < 3; k++)
 						{
-							float vertex = cubeVertexArray[index][k] + offsetPos[k];
+							float vertex = cubeVertexArray[index][k] + offsetPos[k] + 0.5f;
 							mesh.vertexData.push_back(vertex);
 						}
 
