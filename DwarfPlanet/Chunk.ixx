@@ -257,38 +257,42 @@ export class Chunk
 	private:
 		void createVoxel(MeshData& mesh, float offsetPos[3])
 		{
-			for (int i = 0; i < 6; i++)
+			Vec3 position = Vec3(offsetPos[0], offsetPos[1], offsetPos[2]);
+			Vec3 worldPos = position + getPosition();
+			BlockType blockType = data.getBlockType(data.getVoxel(worldPos));
+
+			if (blockType.isSolid)
 			{
-				Vec3 position = Vec3(offsetPos[0], offsetPos[1], offsetPos[2]);
-				Vec3 neighborPos = position + NeighborArray[i];
-				if (!hasSolidVoxel(neighborPos))
+				for (int i = 0; i < 6; i++)
 				{
-					Vec3 worldPos = position + getPosition();
-					BlockType blockType = data.getBlockType(data.getVoxel(worldPos));
-					std::string textureName = blockType.getTextureName(i);
-					std::vector<float> uvVector = atlas.getUVCoordinates(textureName);
-					for (int j = 0; j < 4; j++)
+					Vec3 neighborPos = position + NeighborArray[i];
+					if (!hasSolidVoxel(neighborPos))
 					{
-						int index = cubeIndexArray[i][j];
-						for (int k = 0; k < 3; k++)
+						std::string textureName = blockType.getTextureName(i);
+						std::vector<float> uvVector = atlas.getUVCoordinates(textureName);
+						for (int j = 0; j < 4; j++)
 						{
-							float vertex = cubeVertexArray[index][k] + offsetPos[k] + 0.5f;
-							mesh.vertexData.push_back(vertex);
+							int index = cubeIndexArray[i][j];
+							for (int k = 0; k < 3; k++)
+							{
+								float vertex = cubeVertexArray[index][k] + offsetPos[k] + 0.5f;
+								mesh.vertexData.push_back(vertex);
+							}
+
+							for (int l = 0; l < 2; l++)
+							{
+								float uv = uvVector[j * 2 + l];
+								mesh.vertexData.push_back(uv);
+							}
 						}
 
-						for (int l = 0; l < 2; l++)
+						int indexArray[6] = { 0, 1, 2, 2, 1, 3 };
+						for (int j = 0; j < 6; j++)
 						{
-							float uv = uvVector[j * 2 + l];
-							mesh.vertexData.push_back(uv);
+							mesh.indexData.push_back(indexIndex + indexArray[j]);
 						}
+						indexIndex += 4;
 					}
-
-					int indexArray[6] = { 0, 1, 2, 2, 1, 3 };
-					for (int j = 0; j < 6; j++)
-					{
-						mesh.indexData.push_back(indexIndex + indexArray[j]);
-					}
-					indexIndex += 4;
 				}
 			}
 		}

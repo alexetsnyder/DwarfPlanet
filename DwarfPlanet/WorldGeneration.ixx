@@ -30,7 +30,7 @@ export class WorldGeneration
 				{
 					ChunkID chunkId(x, z);
 
-					Chunk chunk(chunkId, 4, 16);
+					Chunk chunk(chunkId, 16, 128);
 					chunk.init();
 					chunk.setMeshData();
 

@@ -1,9 +1,11 @@
 export module WorldData;
 
+import <iostream>;
 import <map>;
 import <vector>;
 import <string>;
 import glmModule;
+import Noise;
 
 export struct BlockType
 {
@@ -69,6 +71,7 @@ export class WorldData
 {
 	public:
 		WorldData(int chunkHeight)
+			: noise(0, 0.03f)
 		{
 			this->worldSize = 4;
 			this->chunkWidth = 4;
@@ -144,15 +147,18 @@ export class WorldData
 				return getBlockId("bedrock");
 			}
 
-			if (yPos > chunkHeight)
+			float noiseValue = noise.getNoise2D(position.x(), position.z());
+			int height = floor(noise.remap(-1.0f, 1.0f, 20.0f, 60.0f, noiseValue));
+
+			if (yPos > height)
 			{
 				return getBlockId("air");
 			}
-			else if (yPos == chunkHeight - 1)
+			else if (yPos == height)
 			{
 				return getBlockId("grass");
 			}
-			else if (yPos >= chunkHeight - 1 - dirtDepth)
+			else if (yPos >= height - dirtDepth)
 			{
 				return getBlockId("dirt");
 			}
@@ -178,5 +184,6 @@ export class WorldData
 		}
 
 		int chunkWidth, chunkHeight, dirtDepth, worldSize;
+		Noise noise;
 };
 
